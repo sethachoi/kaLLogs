@@ -1,0 +1,36 @@
+video#bgvid { 
+    position: fixed;
+    min-width: 100%;
+    width: auto;
+    height: 100%;
+    z-index: -100;
+    background: url(http://i.imgur.com/uOYFkKS.gifv) no-repeat;
+    background-size: cover; 
+    overflow:hidden;
+}
+
+.container#bgpanel {
+    padding-top: 2%;
+    padding-bottom: 0%;
+}
+
+.container#dispanel {
+    background-color: rgba(255,255,255,0.3);
+}
+
+.container#dispanel h3{
+    text-align:center;
+}
+
+.container#dispanel .btn-group {
+    display: inline-block;
+}
+
+.container .jumbotron {
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 0px;
+}
+
+section#bgsec {
+    height: auto;
+}

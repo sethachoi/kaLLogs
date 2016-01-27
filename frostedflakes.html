@@ -12,7 +12,9 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script src="frost.js"></script>
+
 	</head>
 
 	<body>
@@ -23,7 +25,7 @@
 		<section>
 			<div class="container" id="bgpanel">
 				<div class="jumbotron">
-					<h1>Frosted Flakes</h1>
+					<h1>kaLLogs</h1>
 					<p>kaLLogs visualizes sweet data like memory, CPU, and IO usage for each commit</p>
 				</div>
 			</div>
@@ -33,32 +35,41 @@
 			<div class="container" id="dispanel">
 				<h2> Commit Selection </h2>
 				<p> Don't be afraid of commitment </p>
-
 				<div class="btn-group">
-				  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				    Action <span class="caret"></span>
-				  </button>
-				  <ul class="dropdown-menu">
-				    <li><a href="#">Action</a></li>
-				    <li><a href="#">Another action</a></li>
-				    <li><a href="#">Something else here</a></li>
-				    <li role="separator" class="divider"></li>
-				    <li><a href="#">Separated link</a></li>
-				  </ul>
+				  	<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    Commit <span class="caret"></span>
+				  	</button>
+				  	<ul class="dropdown-menu">
+				    	<li><a href="#">Commit 1</a></li>
+				    	<li><a href="#">Commit a2beef</a></li>
+				    	<li><a href="#">Commit 3adead</a></li>
+				  	</ul>
 				</div>
 
 				<div class="row">
 					<div class="col-md-4">
 						<h3>Memory</h3>
+						<div id="memChart">
+							<div id="tooltip" class="hidden">
+							    <p><span id="value">100</span>
+							    </p>
+							</div>
+						</div>
 					</div>
 					<div class="col-md-4">
 						<h3>CPU</h3>
+						<div id="cpuChart">
+
+						</div>
 					</div>
 					<div class="col-md-4">
 						<h3>IO</h3>
+						<div id="ioChart">
+							
+						</div>
 					</div>
 				</div>
-				
+
 			</div>
 		</section>
 

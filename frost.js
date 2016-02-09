@@ -1,44 +1,148 @@
-var dataset = [{
-	        data: [{
-	            month: 'Aug',
-	            count: 123
-	        	}, {
-	            month: 'Sep',
-	            count: 234
-	        	}, {
-	            month: 'Oct',
-	            count: 345
-        	}], 
-        	name: 'Series #1' }, 
-        	{
-        	data: [{
-            	month: 'Aug',
-            	count: 235
-        		}, {
-            	month: 'Sep',
-            	count: 267
-       			}, {
-            	month: 'Oct',
-            	count: 573
-        	}],
-        name: 'Series #2'
-    	}];
+var memData = [{
+	data: [{
+        commit: 'abc123',
+        count: 123
+    	}, {
+        commit: 'dedbef',
+        count: 234
+    	}, {
+        commit: '29bead',
+        count: 345
+    	}, {
+        commit: '1',
+        count: 143
+    	},{
+        commit: '2',
+        count: 243
+    	},{
+        commit: '3',
+        count: 321
+    	},{
+        commit: '4',
+        count: 241
+    	},{
+        commit: '5',
+        count: 258
+    	},{
+        commit: '6',
+        count: 391
+    	},{
+        commit: '7',
+        count: 211
+    	},{
+        commit: '8',
+        count: 109
+	}], 
+	name: 'Average' }, 
+	{
+	data: [{
+    	commit: 'abc123',
+    	count: 235
+		}, {
+    	commit: 'dedbef',
+    	count: 267
+		}, {
+    	commit: '29bead',
+    	count: 573
+    	}, {
+        commit: '1',
+        count: 234
+    	},{
+        commit: '2',
+        count: 390
+    	},{
+        commit: '3',
+        count: 472
+    	},{
+        commit: '4',
+        count: 532
+    	},{
+        commit: '5',
+        count: 466
+    	},{
+        commit: '6',
+        count: 521
+    	},{
+        commit: '7',
+        count: 622
+    	},{
+        commit: '8',
+        count: 421
+	}],
+    name: 'Max'
+}];
+
+var cpuData = [{
+	data: [{
+        commit: 'abc123',
+        count: 50
+    	}, {
+        commit: 'dedbef',
+        count: 72
+    	}, {
+        commit: '29bead',
+        count: 27
+	}], 
+	name: 'Average' }, 
+	{
+	data: [{
+    	commit: 'abc123',
+    	count: 60
+		}, {
+    	commit: 'dedbef',
+    	count: 97
+			}, {
+    	commit: '29bead',
+    	count: 85
+	}],
+    name: 'Max'
+}];
+
+var ioData = [{
+	data: [{
+        commit: 'abc123',
+        count: 123
+    	}, {
+        commit: 'dedbef',
+        count: 234
+    	}, {
+        commit: '29bead',
+        count: 345
+	}], 
+	name: 'Average' }, 
+	{
+	data: [{
+    	commit: 'abc123',
+    	count: 235
+		}, {
+    	commit: 'dedbef',
+    	count: 267
+			}, {
+    	commit: '29bead',
+    	count: 573
+	}],
+    name: 'Max'
+}];
 
 $(document).ready(function() {
 	$('.dropdown-toggle').dropdown();
 	render();
 });
 
+
+//do this to refresh the data
 function render() {
-	doEverything("memChart",dataset,"scal");
-	doEverything("cpuChart",dataset,"perc");
-	doEverything("ioChart",dataset,"scal");
+	doEverything("memChart",memData,"scal");
+	doEverything("cpuChart",cpuData,"perc");
+	doEverything("ioChart",ioData,"scal");
 }
 
+//fetch data from commit logs
 function getInfo() {
 	console.log("lel");
 }
 
+//I mean... yeah
 function doEverything(target_elem, data_set, type) {
 	var margins = {
 	    top: 12,
@@ -46,10 +150,7 @@ function doEverything(target_elem, data_set, type) {
 	    right: 24,
 	    bottom: 24
 	},
-	legendPanel = {
-	    width: 180
-	},
-	width = 500 - margins.left - margins.right - legendPanel.width,
+	width = 360 - margins.left - margins.right,
 	    height = 200 - margins.top - margins.bottom,
 	    series = data_set.map(function (d) {
 	        return d.name;
@@ -60,7 +161,7 @@ function doEverything(target_elem, data_set, type) {
 	            // axis (the stacked amount) is y
 	            return {
 	                y: o.count,
-	                x: o.month
+	                x: o.commit
 	            };
 	        });
 	    }),
@@ -74,31 +175,37 @@ function doEverything(target_elem, data_set, type) {
 	        return {
 	            x: d.y,
 	            y: d.x,
-	            x0: d.y0
+	            //x0: d.y0
 	        };
 	    });
 	}),
     svg = d3.select('#' + target_elem)
         .append('svg')
-        .attr('width', width + margins.left + margins.right + legendPanel.width)
+        .attr('width', width + margins.left + margins.right)
         .attr('height', height + margins.top + margins.bottom)
         .classed('chartFiller', true)
         .append('g')
-        .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')'),
-    xMax = d3.max(data_set, function (group) {
-        return d3.max(group, function (d) {
-            return d.x + d.x0;
-        });
-    }),
-    xScale = d3.scale.linear()
+        .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+
+    var xMax =  0;
+    if (type === "perc") {
+    	xMax = 100;
+    } else { xMax = d3.max(data_set, function (group) {
+	        return d3.max(group, function (d) {
+	            return d.x ;//+ d.x0;
+	        });
+	    });
+    }
+
+    var xScale = d3.scale.linear()
         .domain([0, xMax])
         .range([0, width]),
-    months = data_set[0].map(function (d) {
+    commits = data_set[0].map(function (d) {
         return d.y;
     }),
-    _ = console.log(months),
+    _ = console.log(commits),
     yScale = d3.scale.ordinal()
-        .domain(months)
+        .domain(commits)
         .rangeRoundBands([0, height], .1),
     xAxis = d3.svg.axis()
         .scale(xScale)
@@ -113,16 +220,14 @@ function doEverything(target_elem, data_set, type) {
         .append('g')
         .style('fill', function (d, i) {
         return colours(i);
-    }),
+    	}).moveToBack(),
     rects = groups.selectAll('rect')
         .data(function (d) {
         return d;
     })
         .enter()
         .append('rect')
-        .attr('x', function (d) {
-        return xScale(d.x0);
-    })
+        .attr('x', 0)
         .attr('y', function (d, i) {
         return yScale(d.y);
     })
@@ -162,3 +267,13 @@ function doEverything(target_elem, data_set, type) {
 	    .attr('class', 'axis')
 	    .call(yAxis);
 }
+
+//used this to make the bars appear in order
+d3.selection.prototype.moveToBack = function() { 
+    return this.each(function() { 
+        var firstChild = this.parentNode.firstChild; 
+        if (firstChild) { 
+            this.parentNode.insertBefore(this, firstChild); 
+        } 
+    }); 
+};

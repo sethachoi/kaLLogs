@@ -52,9 +52,11 @@ def parse_csv():
 
 	print(rownum)
 
-	data[0] = cpusum / rownum
-	data[2] = memsum / rownum
+	data[0] = round(cpusum / rownum, 3)
+	data[2] = round(memsum / rownum, 3)
+	data[1] = round(data[1], 3)
+	data[3] = round(data[3], 3)
 
-	js = [[{"data": [{"commit" : "testdata", "count" : data[0]}], "name" : "Average"},{"data": [{"commit" : "testdata", "count" : data[1]}], "name" : "Average"}],[{"data": [{"commit" : "testdata", "count" : data[2]}], "name" : "Average"},{"data": [{"commit" : "testdata", "count" : data[3]}], "name" : "Average"}]]
-	print(json.dumps(js))
+	js = [[{"data": [{"commit" : "testdata", "count" : data[0]}], "name" : "Average"},{"data": [{"commit" : "testdata", "count" : data[1]}], "name" : "Max"}],[{"data": [{"commit" : "testdata", "count" : data[2]}], "name" : "Average"},{"data": [{"commit" : "testdata", "count" : data[3]}], "name" : "Max"}]]
+	#print(json.dumps(js))
 	return Response(json.dumps(js), mimetype='application/json')

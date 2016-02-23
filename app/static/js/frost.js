@@ -1,3 +1,4 @@
+/*
 var memData = [{
 	data: [{
         commit: 'abc123',
@@ -97,7 +98,7 @@ var cpuData = [{
 	}],
     name: 'Max'
 }];
-
+*/
 var ioData = [{
 	data: [{
         commit: 'abc123',
@@ -124,20 +125,27 @@ var ioData = [{
     name: 'Max'
 }];
 
-var dataDeferred;
+var dataDeferred = new jQuery.Deferred();
+var cpuDataD;
+var memDataD;
 
 $(document).ready(function() {
 	$('.dropdown-toggle').dropdown();
-    dataDeferred = getInfo();
-	render();
+    //dataDeferred = getInfo();
+    //cpuDataD = dataDeferred[0];
+    //memDataD = dataDeferred[1];
+    $.when(getInfo()).then(render);
 	checkPurpose();
 });
 
 
 //do this to refresh the data
-function render() {
-	doEverything("memChart",dataDeferred[1],"scal");
-	doEverything("cpuChart",dataDeferred[0],"perc");
+function render(dData) {
+    console.log(dData);
+    cpuDataD = dData[0];
+    memDataD = dData[1];
+	doEverything("memChart",memDataD,"scal");
+	doEverything("cpuChart",cpuDataD,"perc");
 	doEverything("ioChart",ioData,"scal");
 }
 
@@ -151,12 +159,14 @@ function getInfo() {
         dataType: "json",
         success: function(data) {
             deferredData.resolve(data);
+            deferredData = data;
         },
         complete: function(xhr, textStatus) {
             console.log("AJAX request complete -> ", xhr, " -> ", textStatus);
         }
     });
-    console.log(deferredData);
+    //console.log(deferredData);
+    //console.log(deferredData["cpu"]);
     return deferredData;
 }
 
@@ -193,6 +203,7 @@ function doEverything(target_elem, data_set, type) {
 	        return {
 	            x: d.y,
 	            y: d.x,
+                name: d.name
 	            //x0: d.y0
 	        };
 	    });
@@ -224,7 +235,7 @@ function doEverything(target_elem, data_set, type) {
     _ = console.log(commits),
     yScale = d3.scale.ordinal()
         .domain(commits)
-        .rangeRoundBands([0, height], .1),
+        .rangeRoundBands([0, height], .5),
     xAxis = d3.svg.axis()
         .scale(xScale)
         .orient('bottom'),
@@ -284,6 +295,10 @@ function doEverything(target_elem, data_set, type) {
 	svg.append('g')
 	    .attr('class', 'axis')
 	    .call(yAxis);
+
+    svg.append('g')
+    .attr('class', 'axis')
+    .call(yAxis);
 }
 
 function checkPurpose() {

@@ -7,11 +7,15 @@
 
 	    <title>kaLLogs: Frosted Flakes Data Visualizer</title>
 
+	    <!-- style -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
 		<link href="static/css/frost.css" rel="stylesheet">
 
+		<!-- scripts -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
 		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script src="/static/js/frost.js"></script>
 
@@ -48,7 +52,16 @@
 				    	<a class="dropdown-item" href="#">Commit 3adead</a>
 				  	</div>
 				</div>
-				<button type="button" class="btn btn-sm btn-danger-outline" id="whatismypurpose">I do not fear it</button>
+
+				<button type="button" class="btn btn-sm btn-danger-outline" id="whatismypurpose">Display Commit Data</button>
+
+				<div class="fileinput fileinput-new" data-provides="fileinput">
+  					<span class="btn btn-info btn-sm btn-file"><span class="fileinput-new">Choose CSV</span><span class="fileinput-exists">Change</span><input type="file" name="..." id="filepick"></span>
+  					<span class="fileinput-filename"></span>
+  					<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+				</div>
+
+				<button type="button" class="btn btn-sm btn-primary" id="submitCSV">Upload Chosen CSV</button>
 
 				<div class="row">
 					<div id="tooltip" class="hidden">

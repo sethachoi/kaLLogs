@@ -136,8 +136,37 @@ $(document).ready(function() {
     //memDataD = dataDeferred[1];
     $.when(getInfo()).then(render);
 	checkPurpose();
+    $('#filepick').fileinput();
+    $('#submitCSV').click(function() {
+        sendCSV();
+    });
 });
 
+
+function sendCSV() {
+    console.log("CSV");
+    if($('#filepick').val()!='') {   
+        console.log("CSV1");
+        var formData = new FormData();
+        console.log($('#filepick')[0].files[0]);
+        formData.append('file', $('#filepick')[0].files[0]);
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            async: false,
+            dataType: 'text/csv',
+            success: function (r) { 
+                if(r.success) {
+                //success work 
+                 }
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    }
+}
 
 //do this to refresh the data
 function render(dData) {

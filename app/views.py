@@ -1,12 +1,14 @@
 from flask import Response, render_template, json, jsonify, request, redirect, url_for
 from app import app, db, models
 from werkzeug import secure_filename
-import csv
-import os
+from sqlalchemy.sql import func
+import csv, os, subprocess, datetime
 
 ALLOWED_EXTENSIONS = set(['csv'])
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__),'tmp')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+CSV_FOLDER = os.path.join(os.path.dirname(__file__),'data')
+app.config['CSV_FOLDER'] = CSV_FOLDER
 
 @app.route('/')
 @app.route('/index')
@@ -17,106 +19,59 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route('/upload', methods=['POST'])
-def upload():
-	print("uploading")
-	file = request.files['file']
-	print("request done")
-	data = [0.0,0.0,0.0,0.0]
-	rownum = 0
-	cpunum = 0.0
-	memnum = 0.0
-	cpusum = 0.0
-	memsum = 0.0
+@app.route('/processCSV')
+def processCSV():
+	print("begin processing CSV folder...")
+	query = db.session.query(func.max(models.Entry.upload_count).label('max'))
+	uploadnum = 0
+	checknum = query.one().max
+	if checknum is not None:
+		uploadnum = checknum
+	for file in os.listdir(app.config['CSV_FOLDER']):
+		# get last Entry.upload_count, +1
+	    if allowed_file(file):
+	    	print("processing "+file)
+	    	filepath = os.path.join(app.config['CSV_FOLDER'], file)
+	    	filenameparse = file.split('-')
+	    	fcommit = filenameparse[0]
+	    	fid = filenameparse[1].split('.')[0]
+	    	fdate = datetime.datetime.strptime("1111-11-11 11:11:11.111", "%Y-%m-%d %H:%M:%S.%f")
+	    	#ftime = ""
+	    	#fnano = 0
+	    	fcpu = 0.0
+	    	fmem = 0.0
+	    	e = models.Entry(commit="", date=datetime.datetime.strptime("1111-11-11 11:11:11.111", "%Y-%m-%d %H:%M:%S.%f"), cpu=0.0, mem=0.0, identifier="", upload_count=0)
+	    	with open(filepath) as f:
+	    		rdr = csv.DictReader(f)
+	    		for row in rdr:
+	    			fdate = datetime.datetime.strptime(row['Date'], "%Y-%m-%d %H:%M:%S.%f")#.split(' ')[0]
+	    			#ftime = row['Date'].split(' ')[1].split('.')[0]
+	    			#fnano = row['Date'].split(' ')[1].split('.')[1]
+	    			fcpu = float(row['CPU'])
+	    			fmem = float(row['Mem'])
+	    			e = models.Entry(commit=fcommit, date=fdate, cpu=fcpu, mem=fmem, identifier=fid, upload_count=uploadnum)
+	    			db.session.add(e)
+	    		db.session.commit()
+	    	uploadnum += 1
+	print("done processing csv folder")
 
-	if file and allowed_file(file.filename):
-		filename = secure_filename(file.filename)
-		filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-		file.save(filepath)
-
-		with open(filepath) as f:
-			rdr = csv.DictReader(f)
-			for row in rdr:
-				cpunum = float(row["CPU"])
-				memnum = float(row["Mem"])
-
-				#add to cpu avg sum
-				cpusum += cpunum
-
-				#add to mem avg sum
-				memsum += memnum
-
-				#store max cpu
-				if data[1] < cpunum:
-					data[1] = cpunum
-
-				#store max mem
-				if data[3] < memnum:
-					data[3] = memnum
-
-				rownum += 1
-		data[0] = round(cpusum / rownum, 3)
-		data[2] = round(memsum / rownum, 3)
-		data[1] = round(data[1], 3)
-		data[3] = round(data[3], 3)
-		c = models.Commit(id=filename, ca = data[0], cm = data[1], ma = data[2], mm = data[3])
-		db.session.add(c)
-		db.session.commit()
-		os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-		print("database add success!" + filename)
-	
-	else:
-		print("database add failure :[")
-	file.close()
-	return
-
-@app.route('/parse_csv')
-def parse_csv():
-	#print("testing")
-	#init file opening
-	filepath = os.path.join(os.path.dirname(__file__),'data/sampledata.csv')
-
-#	reader = csv.reader(open_read)
-#	print(filepath)
-
-
-	#cpu avg, cpu max, mem avg, mem max
-	data = [0.0,0.0,0.0,0.0]
-	rownum = 0
-	cpunum = 0.0
-	memnum = 0.0
-	cpusum = 0.0
-	memsum = 0.0
-
-
-	with open(filepath) as f:
-		rdr = csv.DictReader(f)
-		for row in rdr:
-			cpunum = float(row["CPU"])
-			memnum = float(row["Mem"])
-
-			#add to cpu avg sum
-			cpusum += cpunum
-
-			#add to mem avg sum
-			memsum += memnum
-
-			#store max cpu
-			if data[1] < cpunum:
-				data[1] = cpunum
-
-			#store max mem
-			if data[3] < memnum:
-				data[3] = memnum
-
-			rownum += 1
-
-	data[0] = round(cpusum / rownum, 3)
-	data[2] = round(memsum / rownum, 3)
-	data[1] = round(data[1], 3)
-	data[3] = round(data[3], 3)
-
-	js = [[{"data": [{"commit" : "testdata", "count" : data[0]}], "name" : "Average"},{"data": [{"commit" : "testdata", "count" : data[1]}], "name" : "Max"}],[{"data": [{"commit" : "testdata", "count" : data[2]}], "name" : "Average"},{"data": [{"commit" : "testdata", "count" : data[3]}], "name" : "Max"}]]
-	#print(js)
-	#print(json.dumps(js))
-	return Response(json.dumps(js), mimetype='application/json')
+@app.route('/getData', methods=['POST'])
+def getData():
+	print("fetching last 10 commit data")
+	data = []
+	command = "git --git-dir $KALITE_DIR/.git log | grep commit | head -n 10 | awk '{print $2}' | tail -r"
+	text = subprocess.check_output(command, shell=True)
+	commits = text.splitlines()
+	comData = [None] * 10
+	incr = 0
+	for line in commits:
+		comData[incr] = models.Entry.query.filter_by(commit=line)
+		incr += 1
+	for ent in comData:
+		batch = []
+		item = {}
+		for e in ent:
+			item = {"date": e.date, "id": e.identifier, "cpu": e.cpu, "mem": e.mem}
+			batch.append(item)
+		data.append({"commit": ent[0].commit, "data": batch})
+	return json.dumps(data)

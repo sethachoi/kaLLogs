@@ -1,18 +1,21 @@
 from app import db
 
-class Commit(db.Model):
-	id = db.Column(db.String(), primary_key=True)
-	cpuavg = db.Column(db.Float())
-	cpumax = db.Column(db.Float())
-	memavg = db.Column(db.Float())
-	memmax = db.Column(db.Float())
+class Entry(db.Model):
+	pk = db.Column(db.Integer, primary_key=True)
+	commit = db.Column(db.String())
+	date = db.Column(db.DateTime())
+	upload_count = db.Column(db.Integer)
+	cpu = db.Column(db.Float())
+	mem = db.Column(db.Float())
+	identifier = db.Column(db.String())
 
-	def __init__(self, id, ca, cm, ma, mm):
-		self.id = id
-		self.cpuavg = ca
-		self.cpumax = cm
-		self.memavg = ma
-		self.memmax = mm
+	def __init__(self, commit, date, cpu, mem, identifier, upload_count):
+		self.commit = commit
+		self.date = date
+		self.cpu = cpu
+		self.mem = mem
+		self.identifier = identifier
+		self.upload_count = upload_count
 
 	def __repr__(self):
-		return '<Commit %r>' % (self.id)
+		return '"\n"<Commit %r ID %r Date %r>' % (self.commit, self.identifier, self.date)

@@ -134,8 +134,9 @@ $(document).ready(function() {
     //dataDeferred = getInfo();
     //cpuDataD = dataDeferred[0];
     //memDataD = dataDeferred[1];
-    $.when(getInfo()).then(render);
-	checkPurpose();
+    //$.when(getInfo()).then(render);
+    populateCommits();
+	displayCommitData();
     $('#filepick').fileinput();
     $('#submitCSV').click(function() {
         sendCSV();
@@ -166,11 +167,33 @@ function sendCSV() {
             processData: false
         });
     }
+    populateCommits();
+}
+
+function populateCommits() {
+    console.log("populating");
+    var $drop = $('#dropit');
+
+    $.ajax({
+        type: "POST",
+        url: '/commits',
+        dataType: 'json',
+        success: function(json) {
+            $drop.empty(); // remove old options
+            $drop.append($('<a class="dropdown-item" href="#"></a>')
+                    .attr('value', '').text('Please Select'));
+            $.each(json, function(value, key) {
+                $drop.append($('<a class="dropdown-item" href="#"></a>')
+                        .attr('value', value).text(key));
+            });                                                                
+        }
+    });
 }
 
 //do this to refresh the data
 function render(dData) {
     console.log(dData);
+    populateCommits();
     cpuDataD = dData[0];
     memDataD = dData[1];
 	doEverything("memChart",memDataD,"scal");
@@ -181,7 +204,7 @@ function render(dData) {
 //fetch data from commit logs
 function getInfo() {
 	var deferredData = new jQuery.Deferred();
-
+    /*
     $.ajax({
         type: "GET",
         url: "/parse_csv",
@@ -194,6 +217,8 @@ function getInfo() {
             console.log("AJAX request complete -> ", xhr, " -> ", textStatus);
         }
     });
+    */
+
     //console.log(deferredData);
     //console.log(deferredData["cpu"]);
     return deferredData;
@@ -330,12 +355,21 @@ function doEverything(target_elem, data_set, type) {
     .call(yAxis);
 }
 
-function checkPurpose() {
-	$('#whatismypurpose').each(function(i) {
-    	$(this).data('url', 'http://www.pointerpointer.com/');
-	}).click(function() {
-    	window.open($(this).data('url'), '_blank');
-	});
+function displayCommitData() {
+	$('.dropdown-item').click(function() {
+        var deferredData = new jQuery.Deferred();
+        var val = $(this).text();
+        $.ajax({
+            type: "POST",
+            data: {id: val},
+            url: '/getcommitdata',
+            async: false,
+            success: function(json) {
+                render(json);                                                              
+            }
+        });
+        //return deferredData;
+    });
 }
 
 //used this to make the bars appear in order

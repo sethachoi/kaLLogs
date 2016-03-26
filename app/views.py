@@ -15,10 +15,12 @@ app.config['CSV_FOLDER'] = CSV_FOLDER
 def index():
     return render_template('frostedflakes.html')
 
+#this is used to check whether the files are CSV
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+#this processes every CSV file in the app/data folder and stores it to a DB
 @app.route('/processCSV')
 def processCSV():
 	print("begin processing CSV folder...")
@@ -28,7 +30,6 @@ def processCSV():
 	if checknum is not None:
 		uploadnum = checknum
 	for file in os.listdir(app.config['CSV_FOLDER']):
-		# get last Entry.upload_count, +1
 	    if allowed_file(file):
 	    	print("processing "+file)
 	    	filepath = os.path.join(app.config['CSV_FOLDER'], file)
@@ -36,17 +37,13 @@ def processCSV():
 	    	fcommit = filenameparse[0]
 	    	fid = filenameparse[1].split('.')[0]
 	    	fdate = datetime.datetime.strptime("1111-11-11 11:11:11.111", "%Y-%m-%d %H:%M:%S.%f")
-	    	#ftime = ""
-	    	#fnano = 0
 	    	fcpu = 0.0
 	    	fmem = 0.0
 	    	e = models.Entry(commit="", date=datetime.datetime.strptime("1111-11-11 11:11:11.111", "%Y-%m-%d %H:%M:%S.%f"), cpu=0.0, mem=0.0, identifier="", upload_count=0)
 	    	with open(filepath) as f:
 	    		rdr = csv.DictReader(f)
 	    		for row in rdr:
-	    			fdate = datetime.datetime.strptime(row['Date'], "%Y-%m-%d %H:%M:%S.%f")#.split(' ')[0]
-	    			#ftime = row['Date'].split(' ')[1].split('.')[0]
-	    			#fnano = row['Date'].split(' ')[1].split('.')[1]
+	    			fdate = datetime.datetime.strptime(row['Date'], "%Y-%m-%d %H:%M:%S.%f")
 	    			fcpu = float(row['CPU'])
 	    			fmem = float(row['Mem'])
 	    			e = models.Entry(commit=fcommit, date=fdate, cpu=fcpu, mem=fmem, identifier=fid, upload_count=uploadnum)
@@ -55,6 +52,7 @@ def processCSV():
 	    	uploadnum += 1
 	print("done processing csv folder")
 
+#this POSTS data from the last 10 commits by the way of a JSON
 @app.route('/getData', methods=['POST'])
 def getData():
 	print("fetching last 10 commit data")
@@ -73,5 +71,6 @@ def getData():
 		for e in ent:
 			item = {"date": e.date, "id": e.identifier, "cpu": e.cpu, "mem": e.mem}
 			batch.append(item)
-		data.append({"commit": ent[0].commit, "data": batch})
+		if ent is not None:
+			data.append({"commit": ent[0].commit, "data": batch})
 	return json.dumps(data)
